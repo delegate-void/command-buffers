@@ -1,0 +1,63 @@
+#pragma kernel ParticleSimulation
+
+struct Particle
+{
+    float3 position;
+    float3 velocity;
+    float life;
+};
+
+RWStructuredBuffer<Particle> _ParticleBuffer;
+
+float _DeltaTime;
+float2 _MousePosition;
+
+float NRand(float2 uv)
+{
+    return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
+}
+
+// random address in memory
+uint RngState;
+
+uint XORShiftRand()
+{
+    // Xorshift algorithm from George Marsaglia's paper
+    RngState ^= (RngState << 13);
+    RngState ^= (RngState >> 17);
+    RngState ^= (RngState << 5);
+    return RngState;
+}
+
+[numthreads(256, 1, 1)]
+void ParticleSimulation(uint3 id : SV_DispatchThreadID)
+{
+    // subtract the life based on deltaTime
+    _ParticleBuffer[id.x].life -= _DeltaTime;
+
+    float3 delta = float3(_MousePosition.xy, 3) - _ParticleBuffer[id.x].position;
+    float3 dir = normalize(delta);
+
+    // move towards mouse position
+    _ParticleBuffer[id.x].velocity += dir;
+    _ParticleBuffer[id.x].position += _ParticleBuffer[id.x].velocity * _DeltaTime;
+
+
+    if (_ParticleBuffer[id.x].life < 0)
+    {
+        // http://www.reedbeta.com/blog/quick-and-easy-gpu-random-numbers-in-d3d11/
+        RngState = id.x;
+        float f0 = float(XORShiftRand()) * (1.0 / 4294967296.0) - 0.5;
+        float f1 = float(XORShiftRand()) * (1.0 / 4294967296.0) - 0.5;
+        float f2 = float(XORShiftRand()) * (1.0 / 4294967296.0) - 0.5;
+        
+        float3 normalF3 = normalize(float3(f0, f1, f2)) * 0.8f;
+        normalF3 *= float(XORShiftRand()) * (1.0 / 4294967296.0);
+        
+        _ParticleBuffer[id.x].position = float3(normalF3.x + _MousePosition.x, normalF3.y + _MousePosition.y, normalF3.z + 3.0);
+        // reset the life of this particle
+        _ParticleBuffer[id.x].life = 4;
+        _ParticleBuffer[id.x].velocity = float3(0, 0,0);
+    }
+
+}
