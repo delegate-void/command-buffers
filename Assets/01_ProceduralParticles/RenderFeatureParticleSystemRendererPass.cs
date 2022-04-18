@@ -7,7 +7,6 @@ using UnityEngine.Rendering.Universal;
 public class RenderFeatureParticleSystemRendererPass : ScriptableRenderPass
 {
     private RenderFeatureParticleSystemRenderer.Settings _settings = default;
-    private ScriptableRenderer _renderer = default;
 
     #region Compute Shader Props
 
@@ -33,18 +32,7 @@ public class RenderFeatureParticleSystemRendererPass : ScriptableRenderPass
     public RenderFeatureParticleSystemRendererPass(RenderFeatureParticleSystemRenderer.Settings settings)
     {
         _settings = settings;
-
         SetupComputeShader();
-    }
-
-    public void Setup(ScriptableRenderer renderer)
-    {
-        _renderer = renderer;
-    }
-
-    public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
-    {
-        
     }
 
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -55,19 +43,19 @@ public class RenderFeatureParticleSystemRendererPass : ScriptableRenderPass
         var currentPos = renderingData.cameraData.camera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y,
             renderingData.cameraData.camera.nearClipPlane + 14));
         
-        
         float[] mousePosition2D = { currentPos.x, currentPos.y };
         
-        cmd.SetComputeFloatParam(_settings.psComputeShader, "_DeltaTime", Time.deltaTime);
-        cmd.SetComputeFloatParams(_settings.psComputeShader, "_MousePosition", mousePosition2D);
+        // TODO: set compute shader parameters
+        
+        
+        // TODO: dispatch compute shader
+        
         cmd.DispatchCompute(_settings.psComputeShader, _kernelId, _warpCount, 1, 1);
         
-        cmd.DrawProcedural(Matrix4x4.identity, _settings.psMaterial, 0, MeshTopology.Points, 1, _maxNumParticles);
-
-        context.ExecuteCommandBuffer(cmd);
-        cmd.Clear();
+        // TODO: draw procedural mesh
         
-        CommandBufferPool.Release(cmd);
+        
+        // TODO: execute command buffer and clean up
     }
     
     private void SetupComputeShader()

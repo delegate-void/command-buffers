@@ -32,7 +32,6 @@ public class RenderFeatureParticleSystemRenderer : ScriptableRendererFeature
             return;
         }
         
-        _pass.Setup(renderer);
         renderer.EnqueuePass(_pass);
     }
 }

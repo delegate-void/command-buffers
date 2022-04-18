@@ -4,7 +4,7 @@ using UnityEngine.Rendering.Universal;
 public class RenderFeatureInvisibility : ScriptableRendererFeature
 {
     [System.Serializable]
-    public class BlurSettings
+    public class Settings
     {
         public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
 
@@ -18,13 +18,13 @@ public class RenderFeatureInvisibility : ScriptableRendererFeature
     }
 
     [SerializeField] 
-    private BlurSettings _settings = new BlurSettings();
+    private Settings _settings = new Settings();
 
-    private RenderFeatureBlurPass _pass = default;
+    private RenderFeatureInvisibilityPass _pass = default;
 
     public override void Create()
     {
-        _pass = new RenderFeatureBlurPass(_settings);
+        _pass = new RenderFeatureInvisibilityPass(_settings);
     }
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
